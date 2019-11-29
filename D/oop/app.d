@@ -23,8 +23,6 @@ void main()
     // Calls the overridden method
     a.Print(); 
 
-    
-    
     // Calls the parent class method
     a.Person.Print(); 
     
