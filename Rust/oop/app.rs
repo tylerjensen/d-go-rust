@@ -1,93 +1,85 @@
 extern crate chrono;
 use std::io;
-use chrono::prelude::*; //{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
-use chrono::format::ParseError;
+use chrono::prelude::*;
 
 fn main() {
     println!("OOP in Rust!\n");
 
-    //use chrono::{DateTime, TimeZone, NaiveDateTime, Utc};
-
-    let dt = Utc.ymd(1970, 5, 8).and_hms(12,0,9);  //NaiveDateTime::from_timestamp(61, 0), Utc);    
-    //println!("dt, {}", dt);
-    let d = Demographics {
-        DateOfBirth: dt
-    };
-
-    let a = Employee {
-        Demo: d,
-        Per: Person {
-            Name: "Tyler".to_string()
+    let mut a = Employee {
+        demo: Demographics {
+            age: 0,
+            date_of_birth: Utc.ymd(1970, 5, 8).and_hms(12,0,9)
+        },
+        person: Person {
+            name: "Tyler".to_string()
         }
     };
 
-    //a.Print();
-    //a.Per.Print();
-
     // Composition - Demographics object in Employee
-    println!("Age: {}", a.Demo.GetAge());
+    println!("Age: {}", a.demo.calc_age());
 
     // Polymorphism not supported
 	poly(&a);
 
 	// Struct embedding is not inheritance
-    poly_p(&a.Per); // Overloading not supported 
+    poly_p(&a.person); // Overloading not supported 
 
 	// Polymorphism as trait (interface) with pointer to Employee object
 	poly_prt(&a);
-    
+
     let mut name = String::new();
     println!("Press Enter to quit.");
     io::stdin().read_line(&mut name)
-        .expect("Failed to read line.");
+               .expect("Failed to read line.");
 }
 
 fn poly_p(p: &Person) {
-    p.Print();
+    p.print();
 }
 
 fn poly(e: &Employee) {
-    e.Print();
+    e.print();
 }
 
 fn poly_prt<T>(thing: &T) where T: Printable {
-    thing.Print();
+    thing.print();
 }
 
 pub trait Printable {
-    fn Print(&self);
+    fn print(&self);
 }
 
 pub struct Person {
-    pub Name: String
+    pub name: String
 }
 
 impl Printable for Person {
-    fn Print(&self) {
-        println!("Person Print {}", self.Name);
+    fn print(&self) {
+        println!("Person Print {}", self.name);
     }
 }
 
 pub struct Demographics {
     // Cannot make this private and not require initialization 
-    // age: i32,
-    pub DateOfBirth: chrono::DateTime<chrono::offset::Utc>
+    age: i32,
+    pub date_of_birth: chrono::DateTime<chrono::offset::Utc>
 }
 
 impl Demographics {
-    pub fn GetAge(self: &Self) -> i32 {
-        return Utc::now().year() - self.DateOfBirth.year();
+    pub fn calc_age(self: &mut Self) -> i32 {
+        self.age = Utc::now().year() - self.date_of_birth.year();
+        return self.age;
     }
 }
 
 pub struct Employee {
-    pub Per: Person,
-    pub Demo: Demographics 
+    pub person: Person,
+    pub demo: Demographics 
 }
 
 impl Printable for Employee {
-    fn Print(&self) {
-        println!("Employee Print {}", self.Per.Name);
-        println!("Employee Age {}", self.Demo.GetAge());
+    fn print(&self) {
+        println!("Employee Print {}", self.person.name);
+        println!("Employee Age {}", self.demo.age);
     }
 }
